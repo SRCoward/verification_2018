@@ -1,0 +1,16 @@
+fof(sam_log,conjecture,![X]:( 0<=X & X<=15 => 
+
+abs(  ln(  1 + 10*2^(-4) + (X*2^(-8))  ) 
+
+- 
+(  0.029541015625 + floor(0.8427734375*(X+10*2^(4)))*2^(-8) + 
+
+-0.18212890625*(floor(X*2^(-2)+10*2^(2)))^2*2^(-12)  )  ) 
+
+<= 2^(-7)  )).
+
+include('Axioms/general.ax').
+include('Axioms/ln-lower.ax').
+include('Axioms/ln-upper.ax').
+include('Axioms/abs.ax').
+include('Axioms/floor.ax').
