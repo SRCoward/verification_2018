@@ -1,0 +1,9 @@
+fof(sam_log_general,conjecture, ! [X,E] : (l=0.69314718055994530941723212145817 & 0<E & E<1 &((0<=X) &  (X<=(2^(-__w)-2^(-23))) ) => (abs(((ln(1+__y+ X))/l)-(((__T)*((X)^2))+E*(__A) +  (__B)*X+(__C))))<=__e)).
+
+  
+
+
+include('Axioms/general.ax').
+include('Axioms/ln-lower.ax').
+include('Axioms/ln-upper.ax').
+include('Axioms/abs.ax').

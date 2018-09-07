@@ -1,0 +1,11 @@
+fof(sam_log_general,conjecture, ![X]:( ( L=0.69314718055994530941723212145817 & (0<= X & X<= 2^22- 2^7) ) =>
+(  ( (( floor( ( 95388834 + floor( ( 2097152 + 591252*X - 451*floor( (X^2)/(2^22) ) ) * 2^-22 )) * 2^-28 )  - ln(1+0.279296875+X*2^-31)/L)) <  2^-28 ) )  &
+   ( (( floor( ( 95388834 + floor( ( 2097152 + 591252*X - 451*floor( (X^2)/(2^22) ) ) * 2^-22 )) * 2^-28 )  - ln(1+0.279296875+X*2^-31)/L)) > -2^-28 ) )).
+
+
+include('Axioms/ln-extended.ax').
+include('Axioms/general.ax').
+include('Axioms/ln-lower.ax').
+include('Axioms/ln-upper.ax').
+include('Axioms/abs.ax').
+include('Axioms/floor.ax').

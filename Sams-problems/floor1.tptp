@@ -1,0 +1,4 @@
+fof(floor1,conjecture, ![X]:( X-1 < floor(X))).
+
+include('Axioms/general.ax').
+include('Axioms/floor.ax').
