@@ -1,24 +1,3 @@
-\begin{filecontents*}{example.eps}
-%!PS-Adobe-3.0 EPSF-3.0
-%%BoundingBox: 19 19 221 221
-%%CreationDate: Mon Sep 29 1997
-%%Creator: programmed by hand (JK)
-%%EndComments
-gsave
-newpath
-  20 20 moveto
-  20 220 lineto
-  220 220 lineto
-  220 20 lineto
-closepath
-2 setlinewidth
-gsave
-  .4 setgray fill
-grestore
-stroke
-grestore
-\end{filecontents*}
-
 \RequirePackage{fix-cm}
 
 \documentclass[smallcondensed]{svjour3}     
@@ -74,8 +53,8 @@ grestore
 \maketitle
 
 \begin{abstract}
-We present a method for formal verification of transcendental hardware algorithms that scales to higher precision without suffering an exponential growth in runtimes. A class of implementations using piecewise polynomial approximation to compute the result is verified using MetiTarski, an automated theorem prover, which verifies a range of inputs for each call. The method was applied to commercial implementations from Cadence Design Systems with significant runtime gains over exhaustive testing methods and was successful in proving that the expected accuracy of one implementation was overly optimistic.
-\keywords{Theorem Prover\and Transcendental functions \and Floating point algorithms \and Hardware Implementation}
+We present a method for formal verification of transcendental hardware algorithms that scales to higher precision without suffering an exponential growth in runtimes. A class of implementations using piecewise polynomial approximation to compute the result is verified using MetiTarski, an automated theorem prover, which verifies a range of inputs for each call. The method was applied to commercial implementations from Cadence Design Systems with significant runtime gains over exhaustive testing methods. It was successful in proving that the expected accuracy of one implementation was overly optimistic.
+\keywords{MetiTarski\and transcendental functions \and floating point algorithms \and hardware implementation}
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
 \end{abstract}
@@ -150,14 +129,14 @@ However, for the toy model and other examples investigated in this paper, such a
 where $$M_1\_\ln(1+x)=c+2^{-8}\floor(b(X+2^{4}y))+2^{-12}a(\floor(2^{-2}X+2^{2}y))^2$$
 
 An alternative method to model the errors arising from such bit manipulations in the hardware implementations is to include additional error variables in place of the floor function. These techniques were explored before support for the floor function was included, so we can compare both methodologies. Modeling our updated implementation using error variables rather than the floor function yields a MetiTarski problem of the form
-\begin{gather*}
-	0\le X \le 15 \hspace{0.1cm} \land \hspace{0.1cm} 0\le \epsilon_1<1\hspace{0.1cm} \land \hspace{0.1cm} 0\le \epsilon_2<1\\
-	\implies \abs{\ln(1+2^{-4}y+2^{-8}X) - M_2\_\ln(1+x,\epsilon_1,\epsilon_2)} < 2^{-7}
-\end{gather*}
+\begin{multline*}
+	\qquad 0\le X \le 15 \; \land \; 0\le \epsilon_1<1\; \land \; 0\le \epsilon_2<1 \\
+	\implies \abs{\ln(1+2^{-4}y+2^{-8}X) - M_2\_\ln(1+x,\epsilon_1,\epsilon_2)} < 2^{-7}\qquad
+\end{multline*}
 where
-$$M_2\_\ln(1+x,\epsilon_1,\epsilon_2)=c+2^{-8}(b(X+2^{4}y)-\epsilon_1)+2^{-12}a((2^{-2}X+2^{2}y)-\epsilon_2)^2$$
+$$M_2\_\ln(1+x,\epsilon_1,\epsilon_2)=c+2^{-8}(b(X+2^{4}y)-\epsilon_1)+2^{-12}a((2^{-2}X+2^{2}y)-\epsilon_2)^2$$.
 
-Surprisingly, for this particular problem using additional error variables rather than the floor function actually had minimal impact on the overall runtime for the 16 problems. This was unexpected: MetiTarski runtimes can be doubly exponential in the number of variables, an inherent limitation of the decision procedures on which it relies. However, the floor function is a recent addition to MetiTarski and we may be able to improve its performance by fine-tuning its heuristic parameters, which at present are at default values. On industrial implementations, it was necessary to combine manually error variables and estimate an upper bound on these. This was often challenging: some of the error variables can be highly correlated. The floor function has the potential to make the process of generating a template problem significantly simpler. Unfortunately, for the main part of this work, the floor function was not supported and error variables were the only available option.
+Surprisingly, for this particular problem, using additional error variables rather than the floor function had minimal impact on the overall runtime for the 16 problems. This was unexpected: MetiTarski runtimes can be doubly exponential in the number of variables, an inherent limitation of the decision procedures on which it relies. However, the floor function is a recent addition to MetiTarski and we may be able to improve its performance by fine-tuning its heuristic parameters, which at present are at default values. On industrial implementations, it was necessary to combine manually error variables and estimate an upper bound on these. This was often challenging: some of the error variables can be highly correlated. The floor function has the potential to make the process of generating a template problem significantly simpler. Unfortunately, for the main part of this work, the floor function was not supported and error variables were the only available option.
 \begin{figure}
 \centering
 \input{runtime.tex}
