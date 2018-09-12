@@ -1,16 +1,11 @@
-\documentclass[a4]{article}
+\documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 \usepackage{bm}
 \usepackage{amssymb,amsmath}
 \usepackage{topcapt,booktabs}
 \usepackage{tikz}
 \usepackage{pgfplots} \pgfplotsset{compat=newest}
-\usepackage{subcaption}
 \usetikzlibrary{positioning}
-\usetikzlibrary{intersections}
-\usepackage[noadjust]{cite}
-\renewcommand{\citedash}{--}   
 \newcommand{\abs}[1]{\lvert#1\rvert}
 \newcommand{\floor}{\mathop{\textrm{floor}}\nolimits}
 \begin{document}
@@ -20,10 +15,7 @@
 
 \maketitle
 
-\normalsize
-\begin{center}
 \section*{Abstract}
-\end{center}
 
 We present a method for formal verification of transcendental hardware algorithms that scales to higher precision without suffering an exponential growth in runtimes. A class of implementations using piecewise polynomial approximation to compute the result is verified using MetiTarski, an automated theorem prover, which verifies a range of inputs for each call. The method was applied to commercial implementations from Cadence Design Systems with significant runtime gains over exhaustive testing methods and was successful in detecting a bug in one of the implementations.  
 
@@ -128,8 +120,8 @@ The second implementation in Table \ref{result} is an experimental test case gen
 \midrule
  Input Region Verified& $[0.5,2)$ & $[1,2) $ \\ 
  MetiTarski Problems & 128 & 512 \\
- MetiTarski Runtime (mins.) &  7 & 4 \\ 
- Exhaustive Test Runtime (mins.) & 42 & 53 \\ 
+ MetiTarski Time (mins.) &  7 & 4 \\ 
+ Exhaustive Test Time (mins.) & 42 & 53 \\ 
 \bottomrule
 \end{tabular}
 \caption{Verification runtime results for industrial implementations of logarithm base 2, results obtained running on a single core}
