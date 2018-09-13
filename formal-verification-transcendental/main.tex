@@ -140,7 +140,7 @@ Surprisingly, for this particular problem, using additional error variables rath
 \begin{figure}
 \centering
 \input{runtime.tex}
-\caption{A graph demonstrating the runtime comparison of the competing verification procedures on implementations of growing precisions, results obtained running on a single core. \label{runtime_graph}
+\caption{A graph demonstrating the runtime comparison of the competing verification procedures on implementations of growing precisions, results obtained running on a single core \label{runtime_graph}
 }
 \end{figure}
 To see why this technique is powerful, we extend the implementation above to larger input spaces. The approximation is essentially the same, using the same coefficients and lookup table, but our input now may be 10 bits rather than 8 bits, for example. Figure \ref{runtime_graph} compares the runtimes of our methodology and exhaustive testing as the input space grows. Notably, the MetiTarski method has roughly constant runtimes, as we expect: MetiTarski is an analytic tool, so increasing the space of discrete inputs only minimally alters the MetiTarski problems. Conversely, exhaustive testing runtimes suffer from exponential growth in the number of bits of the input. Of course, if the size of the lookup table increases, this will affect the MetiTarski runtimes as the number of problems will grow exponentially. In the results that follow there is still a significant gain.
