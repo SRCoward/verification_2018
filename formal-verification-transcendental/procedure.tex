@@ -1,0 +1,31 @@
+\begin{tikzpicture}
+
+% Top row
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=0.7cm] at (-1,8.5) (impl) {Implementation};
+
+% Second row
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=0.7cm] at (-1,6.5) (temp) {Template Problem};
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=0.7cm] at (5,6.5) (prob) {Problem Files};
+\node [shape=rectangle,draw = black, minimum width = 2cm,minimum height=0.7cm] at (11,6.5)   (metit) {MetiTarski};
+
+% Third row
+\node [shape=rectangle,draw=black,text width=3cm,text centered] at (-1,4.5) (refine)   {Refine error model};
+\node [shape=ellipse,draw=black,text width=3cm,text centered] at (5,4.5)   (more_ref) {Exhausted error refinement?};
+\node [shape=ellipse,draw=black,text width=3cm,text centered] at (11,4.5) (prove)    {All problems proven true?};
+
+% Fourth row
+\node [] at (5,2.5)   (test) {Exhaustive testing};
+\node [] at (11,2.5) (verif) {Verified};
+
+%Lines between input and LUT or final output box
+\draw [->,very thick] (impl) -- (temp) node[midway,right] {\small \textit{Start}};
+\draw [->,very thick] (temp) -- (prob) node[midway,above] {\small \textit{Wrapper script}};
+\draw [->,very thick] (prob) -- (metit) node[midway,above] {\small \textit{Perl script}};
+\draw [->,very thick] (metit) -- (prove) ;
+\draw [->,very thick] (prove) -- (more_ref) node[midway,above] {\textit{No}};
+\draw [->,very thick] (more_ref) -- (refine) node[midway,above] {\textit{No}};
+\draw [->,very thick] (prove) -- (verif) node[midway,right] {\textit{Yes}};
+\draw [->,very thick] (more_ref) -- (test) node[midway,right] {\textit{Yes}};
+\draw [->,very thick] (refine) -- (temp);
+
+\end{tikzpicture}

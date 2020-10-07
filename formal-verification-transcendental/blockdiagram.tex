@@ -1,0 +1,71 @@
+\begin{tikzpicture}
+%draw input nodes
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=0.7cm] at (0.5,6.5) {\huge $s$};
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=0.7cm] at (1.5,6.5) {\huge $e$};
+\node [shape=rectangle,draw = black, minimum width = 2cm,minimum height=0.7cm] at (3,6.5) (y) {\huge $y$};
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=0.7cm] at (4.5,6.5) (w) {\huge $w$};
+\node [shape=rectangle,draw = black, minimum width = 3cm,minimum height=0.7cm] at (6.5,6.5) (x) {\LARGE $X$};
+\node [shape=rectangle,draw = black, minimum width = 2cm,minimum height=0.7cm] at (9,6.5) (z) {\LARGE $Z$};
+
+\draw[pattern=north west lines, pattern color=black] (10,6.15) rectangle ++(0.7,0.7);
+
+
+%\node at (0.5,7.5){sign};
+%\node at (1.5,7.5){exp};
+%\node at (8.5,8.1) {\huge mantissa};
+
+%labels above inputs
+
+\node at (6,7.7) (mant) {\LARGE significand};
+\node at (2.2,7.7) (left_mant) {};
+\node at (10.5,7.7) (right_mant) {};
+\node at (10,7.1) (lowest) {\large 22 \hspace{0.1cm}23};
+\node at (8,7.1) (low) {\large 16 \hspace{0.1cm}17};
+\node at (4.5,7.1) (mid){\large 6 \hspace{0.3cm} 7 \hspace{0.32cm} 8};
+\node at (2.2,7.1) (high) {\large 1};
+
+\draw [dashed] (lowest) edge (low);
+\draw [dashed] (low) edge (mid);
+\draw [dashed] (mid) edge (high);
+\draw [->] (mant) edge (left_mant);
+\draw [->] (mant) edge (right_mant);
+
+%draw lookup table with nodes output from LUT
+\node [shape=rectangle,draw = black, minimum width = 3cm,minimum height=1cm] at (2,5) (lut) {\huge LUT};
+\node [shape=rectangle,draw=black] at (0.5,3.5) (a) {\huge $a$};
+\node [shape=rectangle,draw=black] at (2,3.55) (b) {\huge $b$};
+\node [shape=rectangle,draw=black] at (3.5,3.5) (c) {\huge $c$};
+
+%draw output box
+\node [shape=rectangle,draw = black,minimum height=2cm] at (8,1.5) (poly) {\large $a\left \lfloor2^9(\overline{w}-2^{-9}X)^2\right \rfloor 2^{-33}+b(2^{-22}Z+2^{-16}X-2^{-7}\overline{w})2^{-16}+c$};
+
+\node [shape=rectangle,draw = black,minimum height=1cm] at (5,-0.5) (round) {\large Round and Truncate};
+
+\node [shape=rectangle,draw = black,minimum height=1cm] at (8.65,-0.5) (exp_scale) {\large add $e$};
+
+\node [shape=rectangle,draw = black,minimum height=1cm] at (11.5,-0.5) (output) {\large 32 bit output};
+
+%Lines between input and LUT or final output box
+\draw [->,very thick] (y) edge (lut);
+\draw [->,very thick] (x) edge (poly);
+\draw [->,very thick] (w) edge (poly);
+\draw [->,very thick] (z) edge (poly);
+\draw [->,very thick] (poly) edge (round);
+\draw [->,very thick] (round) edge (exp_scale);
+\draw [->,very thick] (exp_scale) edge (output);
+
+
+%Edges between LUT and outcomes
+\draw [->,very thick] (lut) edge (a);
+\draw [->,very thick] (lut) edge (b);
+\draw [->,very thick] (lut) edge (c);
+%Draw right angle edges
+\draw [-,very thick] (a) edge (0.5,1.5);
+\draw [-,very thick] (b) edge (2,1.5);
+%\draw [-,very thick] (c) edge (3.5,1.5);
+\node at (3.5,2.4) (emptyc) {};
+\draw [->,very thick] (c) edge (emptyc);
+\node at (0.38,1.5) (empty) {};
+\draw [->,very thick] (empty) edge (poly);
+
+\end{tikzpicture}
