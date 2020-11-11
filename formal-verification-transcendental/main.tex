@@ -50,7 +50,7 @@ We present a method for formal verification of transcendental hardware and softw
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{intro}
-Formal verification of floating point operations is becoming ever more challenging as hardware designs reach levels of complexity only previously seen in software. Its importance in industry is well known, exemplified by the Pentium floating point division bug \cite{pratt1995anatomy}. The bulk of this research was conducted during a project at Cadence Design Systems. Building upon this, we present a new approach to the verification of fixed and floating point transcendental algorithms. This technique should be viable for verifying high precision algorithms, as our findings suggest that runtimes will not rise exponentially with the precision.  Our experiments cover implementations of logarithms and the sine function; however, the methodology can also be applied to many different functions implemented using algorithms of the form described in \S \ref{trans functs}. Verification of logarithm implementations is a relevant problem as it finds applications in fields such as digital signal processing and 3D graphics \cite{lewis1995114,harris2001powering}. In addition, it can be very simple to implement, with one of the simplest examples of a floating point logarithm just using the exponent as the integer part of the result combined with a lookup table for the most significant bits (msb) of the significand, to generate the fractional part \cite{harris2001powering}.
+Formal verification of floating point operations is becoming ever more challenging as hardware designs reach levels of complexity only previously seen in software. Its importance in industry is well known, exemplified by the Pentium floating point division bug \cite{pratt1995anatomy}. The bulk of this research was conducted during a project at Cadence Design Systems. Building upon this, we present a new approach to the verification of fixed and floating point transcendental algorithms. This technique should be viable for verifying high precision algorithms, as our findings suggest that runtimes will not rise exponentially with the precision.  Our experiments cover implementations of logarithms and the sine function; however, the methodology can also be applied to many different functions implemented using algorithms of the form described in \S \ref{trans functs}. Verification of logarithm implementations is a relevant problem as it finds applications in fields such as digital signal processing and 3D graphics \cite{lewis1995114,harris2001powering}. In addition, it can be very simple to implement, with one of the simplest examples of a floating point logarithm using the exponent as the integer part of the result combined with a lookup table for the most significant bits (msb) of the significand, to generate the fractional part \cite{harris2001powering}.
 \begin{equation*}
     \log(2^{\textit{exp}} \times 1.sig) \approx \textit{exp} + LUT(\textit{sig}[msb])
 \end{equation*}
@@ -68,10 +68,10 @@ The paper will focus on implementations of transcendental functions in hardware 
 To produce the required proofs we use MetiTarski~\cite{akbarpour2010metitarski}, an automatic theorem prover for real valued analytic functions, such as cosine and logarithm. It's a combination of a resolution theorem prover and a decision procedure for the theory of real closed fields (RCF). A field is real closed if every positive number has a square root, which is equivalent to saying that it has the same first-order properties as the reals. The resolution prover at the base of MetiTarski is Joe Hurd's Metis \cite{metis_theorem_prover}, which is modified in several respects \cite{akbarpour2008metitarski}. One key modification is to the ordering of the resolution prover \cite{ludwig2007extension}, which encourages the replacement of supported functions by bounds. The inbuilt axioms are primarily upper and lower bounds on a set of supported functions. The choice of these bounds was carefully considered. Many are based on the bounds proposed by Daumas, Lester and Munoz \cite{daumas2008verified}; these are typically derived from Taylor series. Other bounds are obtained from continued fraction expansions, for example
 \[\frac{1}{2} \leq x \leq 1 \implies \frac{x-1}{x} \leq \ln(x) \leq \frac{3x^2-4x+1}{2x^2}.\]
 
-The resolution prover applies the axioms replacing any supported funtions and generates polynomial inequalites. With the problem reduced to the theory of RCFs, the decision procedure is then sufficient to finalise the proof. Conjectures are passed to MetiTarski as a set of inequalities which are transformed by replacing any special function by an appropriate bound. Typically proofs are found in a few seconds \cite{akbarpour2009applications}, but if MetiTarski is unable to prove a conjecture it does not mean that the conjecture is false. For verification it is important that MetiTarski produces machine readable proofs that include algebraic simplification, decision procedure calls, and resolution rules \cite{denman2009formal}. MetiTarski is among a limited number of automated tools supporting transcendental functions. Examples include the first-order logic automated reasoning tool \texttt{dReal} \cite{gao2013dreal} and an approach to Satisfiability Modulo the theory of transcendental functions, which used properties from the MetiTarski suite as benchmarks \cite{cimatti2017satisfiability}. Our initial research inspired a new enhancement to MetiTarski, with the addition of axioms to bound the floor function. The main benefit of the update, for this paper, is to simplify the syntax and construction of our conjectures, with this contribution being the first application of the new axioms.
+The resolution prover applies the axioms, replacing any supported funtions and generates polynomial inequalites. With the problem reduced to the theory of RCFs, the decision procedure is then sufficient to finalise the proof. Conjectures are passed to MetiTarski as a set of inequalities which are transformed by replacing any special function by an appropriate bound. Typically proofs are found in a few seconds \cite{akbarpour2009applications}, but if MetiTarski is unable to prove a conjecture it does not mean that the conjecture is false. For verification it is important that MetiTarski produces machine readable proofs that include algebraic simplification, decision procedure calls, and resolution rules \cite{denman2009formal}. MetiTarski is among a limited number of automated tools supporting transcendental functions. Examples include the first-order logic automated reasoning tool \texttt{dReal} \cite{gao2013dreal} and an approach to Satisfiability Modulo the theory of transcendental functions, which used properties from the MetiTarski suite as benchmarks \cite{cimatti2017satisfiability}. Our initial research inspired a new enhancement to MetiTarski, with the addition of axioms to bound the floor function. The main benefit of the update, for this paper, is to simplify the syntax and construction of our conjectures, with this contribution being the first application of the new axioms.
 
 % Summary of paper sections
-In the following section we will discuss the common approaches to implementations of elementary functions. In \S \ref{Method}, we will describe the verification methodology of this paper with actual applications and results of using this method presented in \S \ref{Apps}. Lastly we will compare our approach to other theorem proving verification methods in \S \ref{gappa} and \S \ref{Related}.
+In \S \ref{trans functs} we will discuss the common approaches to implementations of elementary functions. In \S \ref{Method} we will describe the verification methodology of this paper, with actual applications and results of using this method presented in \S \ref{Apps}. Lastly, we will compare our approach to other theorem proving verification methods in \S \ref{gappa} and \S \ref{Related}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Transcendental Function Implementations
@@ -180,7 +180,7 @@ M_1\_\ln(1+x)=\_\_c+2^{-8}\floor(\_\_b(X+2^{4}\_\_y))+2^{-12}\_\_a(\floor(2^{-2}
 \]
 
 % Error correlation and flaw in its approach.
-Using the floor function provides a simple, but usually effective model. However, this approach has an issue, which it shares with interval arithmetic, in that all correlation of errors is lost by this approach. To demonstrate this problem consider the following equation and MetiTarski floor function model of it, where $z$ is a 4 bit integer.
+Using the floor function provides a simple, but usually effective, model. However, this approach has an issue, which it shares with interval arithmetic, in that all correlation of errors is lost by this approach. To demonstrate this problem consider the following equation and MetiTarski floor function model of it, where $z$ is a 4 bit integer.
 \[
 (z>>1) - (z>>2) \rightarrow  \floor(\frac{1}{2}z) - \floor(\frac{1}{4}z)
 \]
@@ -188,7 +188,7 @@ Using the floor function provides a simple, but usually effective model. However
 \floor(\frac{1}{2}z) \in [\frac{1}{2}z-1, \frac{1}{2}z], \quad \floor(\frac{1}{4}z) \in [\frac{1}{4}z-1,\frac{1}{4}z]
 \]
 
-The floor function model indicates that this equation is bounded below by $\frac{1}{2}z - 1 - \frac{1}{4}z = \frac{1}{4}z - 1$. In actual fact the equation is bounded below by $\frac{1}{4}z - \frac{1}{4}$. This discrepancy is a result of disregarding any correlation between the two terms in the model. This issue also occurs in interval arithmetic, but fortunately we can deploy additional variables in our model which account for some of this correlation. Using two additional error variables our MetiTarski problem can model this behaviour more accurately.
+The floor function model indicates that this equation is bounded below by $\frac{1}{2}z - 1 - \frac{1}{4}z = \frac{1}{4}z - 1$. In actual fact the equation is bounded below by $\frac{1}{4}z - \frac{1}{4}$. This discrepancy is a result of disregarding any correlation between the two terms in the model. This issue also occurs in interval arithmetic, but fortunately we can deploy additional variables in our model which account for some of this correlation. By using two additional error variables our MetiTarski problem can model this behaviour more accurately.
 \begin{align*}
 (z>>1) - (z>>2) &\rightarrow \frac{1}{2}z - \epsilon_0 - (\frac{1}{4}z - \epsilon_1 - \frac{1}{2}\epsilon_0) \qquad z \in [0,15], \quad \epsilon_0 \in [0,\frac{1}{2}], \quad \epsilon_1 \in [0,\frac{1}{2}] \\   
                 &=           \frac{1}{4}z + \epsilon_1 - \frac{1}{2}\epsilon_0 \in [\frac{1}{4}z - \frac{1}{4}, \frac{1}{4}z + \frac{1}{2}]
@@ -275,10 +275,6 @@ The second implementation in Table \ref{result} is an experimental test case gen
 
 % Table of results
 \begin{table}
-\caption{Verification runtime results for industrial implementations of logarithm base 2. The floating point implementation is a binary 32 bit IEEE-754 implementation.\newline
-1. Run on Intel Xeon E5 2698, speed: 2.3 GHz, CPUS: 2, cores: 2, cache-size: 40MB
-\newline
-2. Run on Intel Xeon X5680 machines, speed: 3.33 GHz, CPUS: 2, cores: 12, cache-size: 12MB}
 \label{result}     
 \begin{tabular}{lll}
 \hline\noalign{\smallskip}
@@ -288,10 +284,14 @@ Design & Floating point $\log_2$ & Fixed point 8.24 $\log_2$    \\
 
  Input Region Verified& $[0.5,2)$ & $[1,2) $ \\ 
  MetiTarski Problems & 128 & 512 \\
- MetiTarski Time (mins.)$^1$ &  7 & 4 \\ 
- Exhaustive Test Time (mins.)$^2$ & 42 & 53 \\
+ MetiTarski Time (mins.)$^a$ &  7 & 4 \\ 
+ Exhaustive Test Time (mins.)$^b$ & 42 & 53 \\
 \noalign{\smallskip}\hline
 \end{tabular}
+\caption{Verification runtime results for industrial implementations of logarithm base 2. The floating point implementation is a binary 32 bit IEEE-754 implementation.\newline
+a. Run on Intel Xeon E5 2698, speed: 2.3 GHz, CPUS: 2, cores: 2, cache-size: 40MB
+\newline
+b. Run on Intel Xeon X5680 machines, speed: 3.33 GHz, CPUS: 2, cores: 12, cache-size: 12MB}
 \end{table}
 
 % Speedup
@@ -327,18 +327,16 @@ In this code, the input is represented as a sum of two double precision argument
 
 The Gappa approach makes use of the IEEEdouble shortcut for the IEEE-compliant double precision \textit{round to nearest} mode, in order to encode the rounding errors in this implementation. Since the IEEE-754 standard imposes exact arithmetic in double precision \textit{round to nearest} mode, the maximum relative error incurred in each arithmetic operation is $2^{-54}$, since double precision uses a 53 bit significand. This keeps the error modelling for our MetiTarski problems far simpler than in some hardware algorithms, which can operate at the bit level. Essentially, for each of the operations in the C code, a maximum relative error of $2^{-54}$ can be incurred. This property is commonly described as the $(1+\epsilon)$ lemma. Harrison describes the bounds on $\epsilon$ in \cite{harrison2006floating}.
 
-The full Gappa script is given in \cite{5483294}, and for the purpose of comparison we use the same outline of the problem to prove, just using more explicit error modelling. In the Gappa script, 4 variables are used, since the sine is represented by a variable $S\in[0,1]$. Since MetiTarski supports axiomatic bounds on functions such as sine, this variable could have been dropped in order to reduce the problem to 3 variables. Since Gappa has no notion of sine, first the approximation error between the exact polynomial approximation and sine had to be calculated. This approximation error takes no account of any floating point rouding errors. For this purpose the Sollya tool \cite{ChevillardJoldesLauter2010}, was used to prove that,
+The full Gappa script is given in \cite{5483294}, and for the purpose of comparison we use the same outline of the problem to prove, just using more explicit error modelling. In the Gappa script, 4 variables are used, since the sine is represented by a variable $S\in[0,1]$. Since MetiTarski supports axiomatic bounds on functions such as sine, this variable is dropped in order to reduce the problem to 3 variables. Since Gappa has no notion of sine, first the approximation error between the exact polynomial approximation and sine had to be calculated. This approximation error takes no account of any floating point rouding errors. For this purpose the Sollya tool \cite{ChevillardJoldesLauter2010}, was used to prove that,
 \begin{equation}
 |\mathrm{Y}| \leq 6.3 \times 10^{-3} \Rightarrow\left|\frac{\mathrm{PolySinY}-\operatorname{SinY}}{\operatorname{SinY}}\right| \leq 3.7 \times 10^{-24}.
 \end{equation}
-PolySinY represents the exact polynomial specified in the C code above with no floating point rounding errors. We too make use of this same bound in the MetiTarski problems, which introduces a variable $Y$, which is what the sum of our two double precision variable $H$ (msb) and $L$ (lsb) is supposed to approximate. The Gappa script also imposes a bound on the relative error in the argument reduction stage. The MetiTarski translation of this bound is,
+PolySinY represents the exact polynomial specified in the C code above with no floating point rounding errors. In MetiTarski, no additional tools were required, as the inbuilt axiomatic bounds on the sine function were sufficient. The variable $Y$, is the sum of our two double precision variables $H$ (msb) and $L$ (lsb), with a bound on the relative error in the argument reduction stage, also present in the Gappa paper.
 \begin{equation*}
     \left|\frac{H+L-Y}{Y}\right| < 2.53\times 10^{-23} \quad \land \quad |L|<2^{-53}|H|.
 \end{equation*}
 
-The goal is to prove that the maximum relative error in our approximation $s$ of the variable representing sine, $S$, is less than $2^{-67}$.
-
-Since we explicitly calculate the error modelling, and have used placeholder replacement as a strategy throughout the previous sections, the template problems include error placeholders $e_i$ for $i=0,...,7$, where each $e_i \in [1-2^{-54},1+2^{-54}]$, representing the relative error in each arithmetic operation. With these errors inserted the polynomial approximation to sine after expanding out all the brackets reduces to
+The goal is to prove that the maximum relative error in our approximation of $\sin{(Y)}$, is less than $2^{-67}$. Since we explicitly calculate the error modelling, and have used placeholder replacement as a strategy throughout the previous sections, the template problems include error placeholders $e_i$ for $i=0,...,7$, where each $e_i \in [1-2^{-54},1+2^{-54}]$, representing the relative error in each arithmetic operation. With these errors inserted the polynomial approximation to sine after expanding out all the brackets reduces to
 \begin{align*}
     f(H,L, e_0,..., e_7) &= H + e_7(L + g(H,L, e_0,..., e_6)).\\
     g(H, e_0,..., e_6) &= e_0e_4e_5e_6\times aH^3 + e_0^2e_2e_3e_4e_5e_6\times bH^5 + e_0^3e_1e_2e_3e_4e_5e_6\times cH^7
@@ -347,27 +345,29 @@ By considering only $H>0$, and choosing appropriate values for $e_i=1\pm 2^{-54}
 \begin{equation} \label{bound_fun}
 g_{\textrm{min}}(H) \leq g(H,e_0,...,e_6) \leq g_{\textrm{max}}(H) \; \forall e_i \in [1-2^{-54},1+2^{-54}].
 \end{equation}
-We consider $S>0$, which implies that $H>0$, and combine this with the constraints described above 
+We consider only $H>0$, which implies that $\sin{(Y)}>0$. We combine this with the constraints described above. 
 \begin{align}
-    &\left|\frac{f(H,L, e_0,...,e_7)-S}{S}\right|<2^{-67} \quad \forall e_i \in [1-2^{-54},1+2^{-54}] \label{orig_prob} \quad \Leftrightarrow \\
-    & f(H,L,e_0,...,e_7) < (1+2^{-67}) S \, \land \, f(H,L,e_0,...,e_7) > (1-2^{-67}) S \quad \forall e_i \in [1-2^{-54},1+2^{-54}].
+    &\left|\frac{f(H,L, e_0,...,e_7)-\sin{(Y)}}{\sin{(Y)}}\right|<2^{-67} \quad \forall e_i \in [1-2^{-54},1+2^{-54}] \label{orig_prob} \quad \Leftrightarrow \\
+    & f(H,L,e_0,...,e_7) < (1+2^{-67}) \sin{(Y)} \, \land \, f(H,L,e_0,...,e_7) > (1-2^{-67}) \sin{(Y)} 
+    \\
+    & \forall e_i \in [1-2^{-54},1+2^{-54}].
 \end{align}
 Using our bounding functions (eqn \ref{bound_fun}) we can reduce the problem to proving the four inequalities
 \begin{align}
-    &H + e_7(L+g_{\textrm{max}}(H)) < (1+2^{-67}) S\label{upper_bound} \\
-    &H + e_7(L+g_{\textrm{min}}(H)) > (1-2^{-67}) S\label{lower_bound} \quad \textrm{for}\,  e_7=1\pm2^{-54}.
+    &H + e_7(L+g_{\textrm{max}}(H)) < (1+2^{-67}) \sin{(Y)}\label{upper_bound} \\
+    &H + e_7(L+g_{\textrm{min}}(H)) > (1-2^{-67}) \sin{(Y)}\label{lower_bound} \quad \textrm{for}\,  e_7=1\pm2^{-54}.
 \end{align}
 Due to the error bounding approach and the anti-symmetry of sine and the polynomial in $H$, proving these four inequalities is sufficient to verify the original problem (eqn. \ref{orig_prob}).
 
-Like the Gappa solution, MetiTarski required further assistance with some basic rewriting. The full proof scripts are given in Appendix \ref{sine_appendix}. The lower bound problem (eqn. \ref{lower_bound}), was provable using MetiTarski, with a combined time for proving the two cases $e_7=1\pm2^{-54}$ of 31 seconds (run on an Intel I7-3517U CPU).
+Like the Gappa solution, MetiTarski required further assistance with some basic rewriting for one of the inequalities. We can take these separate conjectures and AND them together, since they are all subject to the same constraints. The full proof script is given in Appendix \ref{sine_appendix}. This problem was provable using MetiTarski, with a runtime of 115 seconds on an Intel I7-3517U CPU.
 
-The upper bound problem (eqn. \ref{upper_bound}), however could not be proven by MetiTarski. In fact, we even attempted the significantly easier problem of proving,
+We will briefly digress, as these experiments also highlighted some interesting MetiTarski behaviour. MetiTarski supports 3 different RCF solvers: Z3 \cite{de2008z3}, QEPCAD B \cite{brown2003qepcad} and Mathematica \cite{Mathematica}. Only by using Mathematica as the underlying RCF solver, were we able to prove the results. In fact, neither Z3 nor QEPCAD B could prove the significantly easier problem,
 \begin{equation}
-    H + (1-2^{-54})\times(L+g(H,0,...,0)) < (1+2^{-67})S.
+    H + (1-2^{-54})\times(L+g(H,0,...,0)) < (1+2^{-67})\sin{(Y)}.
 \end{equation}
-This introduces no errors in our function $g$. Unfortunately, MetiTarski did not terminate in its attempts to prove this problem. The point of diminishing returns sets in quickly for MetiTarski with the vast majority of provable problems completing in at most minutes rather than hours. Therefore having waited at least 3 days there was little sign of progress. MetiTarski will also not return a counter example, so the prover is not able to tell us anything about the problem we have given it. 
+This introduces no errors in our function $g$. This discovery suggests that there could be further development in this field.
 
-To conclude this section, we should compare the Gappa method to ours. Gappa's understanding of floating point rounding via the shortcut described above makes it simpler to generate problem scripts when analysing \textit{pure} floating point algorithms. By \textit{pure} we mean that the algorithm only uses standard floating point arithmetic with no bit level manipulations. These are common in software, such as the CRlibm sine function, but in hardware, designers rarely stick to \textit{pure} floating point arithmetic, which would likely pose a different challenge for generating Gappa scripts. In this instance, Gappa proved to be the more suitable tool given that it was able to prove the required theorem (in conjunction with Coq), whilst MetiTarski failed to terminate. In the half of the problem where MetiTarkski succeeded, it required 31 seconds to generate a proof, whilst the complete Gappa and Coq proof took approximately 1 minute. These times are comparable, but in both approaches it is evident that writing the respective scripts is the time-consuming component rather than generating the proofs.
+To conclude this section, we should compare the Gappa method to ours. Gappa's understanding of floating point rounding via the shortcut described above makes it simpler to generate problem scripts when analysing \textit{pure} floating point algorithms. By \textit{pure} we mean that the algorithm only uses standard floating point arithmetic with no bit level manipulations. These are common in software, such as the CRlibm sine function, but in hardware, designers rarely stick to \textit{pure} floating point arithmetic, which would likely pose a different challenge for generating Gappa scripts. The Gappa approach had to involve other tools in its solution, whilst MetiTarski could be used in a standalone manner. The runtimes are comparable, but in both approaches it is evident that writing the respective scripts is the time-consuming component rather than generating the proofs.
 
 Given the availability of tools with inbuilt floating point rounding, such as Gappa, most software implementations will be more amenable to these tools rather than MetiTarski. However, this comparison has shown that the process of obtaining a proof involving an implementation of sine, using MetiTarski, is similar to the approach described for the logarithm earlier. 
 
@@ -393,7 +393,7 @@ In addition to these studies several theorem provers have been applied to floati
 \section{Conclusion}
 \label{Conclusion}
 We have successfully verified a variety of fixed and floating point logarithm implementations using the MetiTarski theorem prover.
-We have also identified a bug in an algorithm that was close to production. Most interesting are the performance results, which suggest that this technique will be viable in the future, when higher precision algorithms are developed. A less successful attempt was made to verify a software implementation of the sine function. The implementation itself is amenable to our method but the limitations of MetiTarski and the error bounding approach were made clear by this example. For such \textit{pure} floating point implementations, other tools, like Gappa, are probably more suitable given their inbuilt understanding of IEEE floating point. Our technique and tool choice, is perhaps better suited to hardware implementations, where greater flexibility is desirable to accommodate the intricacies of hardware designs.
+We have also identified a bug in an algorithm that was close to production. Most interesting are the performance results, which suggest that this technique will be viable in the future, when higher precision algorithms are developed. A software implementation of the sine function was also successfully verified. This highlights the potentially broad scope of this approach, although more complex software algorithms may not be amenable. 
 
 For a set of algorithms following a basic outline, it is possible to automate the whole verification procedure after the initial template and wrapper scripts are written. In this type of setting, the technique is quite powerful. However, for algorithms not following a standard format, the verification process requires significantly more manual effort by a skilled verification engineer than alternative methods. For some cases, the approach may be unsuccessful if the algorithm uses techniques we can't model using MetiTarski. 
 
@@ -428,61 +428,51 @@ include('Axioms/ln-extended.ax'). % Include accurate bounds on ln
 include('Axioms/abs.ax').         % Include axioms describing abs
 \end{lstlisting}
 
-\section{Sine Approximation Template Problems} \label{sine_appendix}
-We show the 2 provable problems from \S \ref{gappa}, which each use 4 variables.
+\section{Sine Approximation Problem} \label{sine_appendix}
+We show the MetiTarski problem from \S \ref{gappa}, which uses 3 variables and the sin-extended axioms. It is comprised of four conjectures under the same constraints, which we AND together. 
 \begin{itemize}
     \item Y - the argument of sine
-    \item S - the variable representing sin(Y)
     \item H - the msb of Y (approx)
     \item L - the lsb of Y (approx)
 \end{itemize}
 
-\noindent \textbf{Lower Bound Problem A}: here we show the $e_7=1+2^{-54}$ case. 
 \begin{lstlisting}
-fof(crlibm_sin, conjecture, ! [S,Y,H,L] : 
+fof(crlibm_sin, conjecture, ! [Y,H,L] : 
 ((
 a = -0.1666666666666666574148081281236954964697360992431640625          &
 b =  0.00833333333333333321768510160154619370587170124053955078125      &
 c = -0.0001984126984126984125263171154784913596813566982746124267578125 &
-S                           : (=2^(-1000), 1=)                          &  
 Y                           : (=2^(-200), 6.3e-3=)                      &  
 H                           > 0                                         &
 L                           : (=-2^(-53)*H, 2^(-53)*H=)                 &
-H+L-Y                       : (-Y*2.53e-23, Y*2.53e-23)                 &
-(S - (Y+a*Y^3+b*Y^5+c*Y^7)) : (=-S*3.7e-24, S*3.7e-24) )
+H+L-Y                       : (-Y*2.53e-23, Y*2.53e-23)                 
+) 
 =>
 ( 
-H +  (L +  ((1+2^(-54))^4 * a * H^3) 
+H + (L + ((1-2^(-54))^4 * a * H^3) 
++ ((1-2^(-54))^5 * (1+2^(-54))^2 * b * H^5) 
++ ((1-2^(-54))^7 * (1+2^(-54))^2 * c * H^7))*(1+2^(-54)) 
+< (1+2^(-67))*sin(Y)    
+&
+H + (L + ((1-2^(-54))^4 * a * H^3) 
++ ((1-2^(-54))^5 * (1+2^(-54))^2 * b * H^5) 
++ ((1-2^(-54))^7 * (1+2^(-54))^2 * c * H^7))*(1-2^(-54)) 
+< (1+2^(-67))*sin(Y)    
+&
+H + (L + ((1+2^(-54))^4 * a * H^3) 
 + ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
-+ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1+2^(-54)) > (1-2^(-67))*S
++ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1+2^(-54)) 
+> (1-2^(-67))*sin(Y) 
+&
+H + L + (((1+2^(-54))^4 * a * H^3) 
++ ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
++ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1-2^(-54)) - 2^(-107)*H 
+> (1-2^(-67))*sin(Y) 
 ))).
 
 include('Axioms/general.ax').
+include('Axioms/sin-extended.ax').
 \end{lstlisting}
-
-\noindent \textbf{Lower Bound Problem B}: here we show the $e_7=1-2^{-54}$ case, which includes basic rewrites and simple bounds.
-\begin{lstlisting}
-fof(crlibm_sin, conjecture, ! [S,Y,H,L] : 
-((
-a = -0.1666666666666666574148081281236954964697360992431640625          &
-b =  0.00833333333333333321768510160154619370587170124053955078125      &
-c = -0.0001984126984126984125263171154784913596813566982746124267578125 &
-S                           : (=2^(-1000), 1=)                          &  
-Y                           : (=2^(-200), 6.3e-3=)                      &  
-H                           > 0                                         &
-L                           : (=-2^(-53)*H, 2^(-53)*H=)                 &
-H+L-Y                       : (-Y*2.53e-23, Y*2.53e-23)                 &
-(S - (Y+a*Y^3+b*Y^5+c*Y^7)) : (=-S*3.7e-24, S*3.7e-24) )
-=>
-( 
-H + L + (((1+2^(-54))^4 * a * H^3) + ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
-+ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7)) * (1-2^(-54))
-- 2^(-107) * H > (1-2^(-67))*S
-))).
-
-include('Axioms/general.ax').
-\end{lstlisting}
-
 
 \end{document}
 
