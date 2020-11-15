@@ -40,10 +40,22 @@
 \maketitle
 
 \begin{abstract}
-We present a method for formal verification of transcendental hardware and software algorithms that scales to higher precision without suffering an exponential growth in runtimes. A class of implementations using piecewise polynomial approximation to compute the result is verified using MetiTarski, an automated theorem prover, which verifies a range of inputs for each call. The method was applied to commercial implementations from Cadence Design Systems with significant runtime gains over exhaustive testing methods and was successful in proving that the expected accuracy of one implementation was overly optimistic.
+We present a method for formal verification of transcendental hardware and software algorithms that scales to higher precision without suffering an exponential growth in runtimes. A class of implementations using piecewise polynomial approximation to compute the result is verified using MetiTarski, an automated theorem prover, which verifies a range of inputs for each call. The method was applied to commercial implementations from Cadence Design Systems with significant runtime gains over exhaustive testing methods and was successful in proving that the expected accuracy of one implementation was overly optimistic. Reproducing the verification of a sine implementation in software, previously done using an alternative theorem proving technique, demonstrates that the MetiTarski approach is a viable competitor. 
 \end{abstract}
 \begin{keywords}Theorem prover; Transcendental functions; Floating point algorithms; Hardware implementation
 \end{keywords}
+
+\section*{Declarations}
+\textbf{Funding:} The conceptualisation and much of the preliminary work for this paper was done during a summer internship at Cadence Design Systems.
+
+\noindent\textbf{Conflicts of interest:} None to declare. 
+
+\noindent\textbf{Availability of data and material:} All problem scripts, excluding the examples verifying commercial Cadence Design Systems' implementations, can be found on GitHub \newline (https://github.com/SRCoward/verification\_2018.git).
+
+\noindent\textbf{Code availability:} MetiTarski is an open source theorem prover. It can be downloaded from
+\newline https://www.cl.cam.ac.uk/~lp15/papers/Arith/. It must be paired with an additional solver, for which there are several options documented in the MetiTarski user guide.
+
+\noindent\textbf{Authors' contributions:} The study conception and design was led by Theo Drane and Emiliano Morini. Material preparation and analysis were performed by Samuel Coward, Lawrence Paulson and Emiliano Morini. The first draft of the manuscript was written by Samuel Coward and edited by Lawrence Paulson.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %INTRODUCTION
@@ -101,7 +113,7 @@ Tang's 1991 paper provided a general framework for implementing a function $f$ o
 \end{enumerate} 
 
 %Sizes of lookup tables and industrial apps
-In the rest of the paper, Tang describes algorithms for $2^x, \log(x),$ and $\sin{(x)}$, for relatively narrow intervals. In these examples, tables ranging in size from 32 to 64 entries are used. To support wider intervals, further transformations of the arguments to these narrow domains are necessary. For example, a common sine transformation is to subtract an integer multiple, $N$, of $\frac{\pi}{2}$ from the argument, $x$, such that $x-N \times \frac{\pi}{2} \in [-\frac{\pi}{4}, \frac{\pi}{4}]$ \cite{harrison2006floating,harrison2000formal}. Having reduced the argument to this narrow domain, the question remains about how to best approximate the function in this interval. Polynomials are a common choice, and to calculate the coefficients there are a number of approaches. Some use Remez algorithm to generate the coefficients of the minmax polynomial \cite{veidinger1960numerical,tang1991table}, while others opt to use carefully rounded coefficients from the function's Chebyshev expansion \cite{378099}. For the IA-64 architecture, Intel provided a library of table based algorithms for computing several transcendental functions \cite{harrison1999computation}. The tables used in this library range in size from 24 to 256 double extended entries, for the exponential and logarithm, respectively.
+In the rest of the paper, Tang describes algorithms for $2^x$, $\log(x),$ and $\sin{(x)}$, for relatively narrow intervals. In these examples, tables ranging in size from 32 to 64 entries are used. To support wider intervals, further transformations of the arguments to these narrow domains are necessary. For example, a common sine transformation is to subtract an integer multiple, $N$, of $\frac{\pi}{2}$ from the argument, $x$, such that $x-N \times \frac{\pi}{2} \in [-\frac{\pi}{4}, \frac{\pi}{4}]$ \cite{harrison2006floating,harrison2000formal}. Having reduced the argument to this narrow domain, the question remains about how to best approximate the function in this interval. Polynomials are a common choice, and to calculate the coefficients there are a number of approaches. Some use Remez algorithm to generate the coefficients of the minmax polynomial \cite{veidinger1960numerical,tang1991table}, while others opt to use carefully rounded coefficients from the function's Chebyshev expansion \cite{378099}. For the IA-64 architecture, Intel provided a library of table based algorithms for computing several transcendental functions \cite{harrison1999computation}. The tables used in this library range in size from 24 to 256 double extended entries, for the exponential and logarithm, respectively.
 
 % LUT with piecewise-poly approx
 Table based algorithms have been further developed and modified to use lookup tables to construct piecewise polynomial approximations to some elementary functions \cite{strollo2011elementary,pineiro2005high}. The reduction step still uses the breakpoint method, but the table no longer returns just an approximation, $T_k$, it now returns multiple polynomial coefficients for each lookup. Strollo, De Caro and Petra present, alongside their algorithm, many different divisions of the input domain. For example, to compute $\ln(1+x)$ for $x\in[0,1]$ using a piecewise-quadratic approximation, accurate to 24 fractional bits, they required 128 table entries of coefficients \cite{strollo2011elementary}. In the industrial implementation described below, a table containing 32 breakpoints is used. 
@@ -237,7 +249,7 @@ We present some results from applying this methodology to the verification of se
 \end{figure}
 
 % Description of implementation
-Figure \ref{block_diagram} gives a description of the floating point implementation verified using this methodology. This implementation was a release candidate for Cadence Design Systems. We see that the 23 bit significand is split into 4 used sections, whilst the last bit is discarded. The top 6 bits, $y$, are passed to the LUT which outputs 3 polynomial coefficients. Using these coefficients the algorithm computes a polynomial approximation to the logarithm. The split significand is used to reduce the number of operations along with a truncation of bits which are insignificant for the accuracy target. The accuracy target for the implementation was 4 ULPs (unit in last place) \cite{muller2010handbook}, which is why, for the following conjectures the bounds on the distance from the true logarithm are $2^{-21}(=4\times 2^{-23})$, since we consider inputs in the region [1,2). The exponent, $e$, in our input region is equal to the IEEE-754 bias $b$, yielding a zero exponent in the decoded value. This was the first implementation verified using the MetiTarski method, and as a result, when this was investigated the floor function was not supported. However, rather than calling the floor function explicitly the bounds on the calculations were calculated by hand and combined to yield a simple bound on the error in either direction. This is a labour intensive method, and was the inspiration behind the introduction of the floor function. This manual approach, resulted in two separate template problems. 
+Figure \ref{block_diagram} gives a description of the floating point implementation verified using this methodology. This implementation was a release candidate for Cadence Design Systems. We see that the 23 bit significand is split into 4 used sections, whilst the last bit is discarded. The top 6 bits, $y$, are passed to the LUT which outputs 3 polynomial coefficients. Using these coefficients, the algorithm computes a polynomial approximation to the logarithm. The split significand is used to reduce the number of operations along with a truncation of bits which are insignificant for the accuracy target. The accuracy target for the implementation was 4 ULPs (unit in last place) \cite{muller2010handbook}, which is why, for the following conjectures the bounds on the distance from the true logarithm are $2^{-21}(=4\times 2^{-23})$, since we consider inputs in the region [1,2). The exponent, $e$, in our input region is equal to the IEEE-754 bias $b$, yielding a zero exponent in the decoded value. This was the first implementation verified using the MetiTarski method, and as a result, when this was investigated the floor function was not supported. However, rather than calling the floor function explicitly the bounds on the calculations were calculated by hand and combined to yield a simple bound on the error in either direction. This is a labour intensive method, and was the inspiration behind the introduction of the floor function. This manual approach, resulted in two separate template problems. 
 
 % Outline template problems
 \begin{align*}
@@ -257,7 +269,7 @@ Figure \ref{block_diagram} gives a description of the floating point implementat
 \end{multline*}
 
 % Describe the templates
-In the conjecture $l$ is a high precision approximation to $\ln(2)$, which is necessary because MetiTarski doesn't support a $\log_2$ function, meaning we need to switch the base. Using MetiTarski it is simple to prove in just 0.1 seconds that $\abs{l-\ln{(2)}}<2^{-37}$. Appendix \ref{ln2_appendix} shows the MetiTarski problems.
+In these conjectures, $l$, is a high precision approximation to $\ln(2)$, which is necessary because MetiTarski only supports the natural logarithm, meaning we need to switch the base. Using MetiTarski it is simple to prove in just 0.1 seconds that $\abs{l-\ln{(2)}}<2^{-37}$. Appendix \ref{ln2_appendix} shows the MetiTarski problem.
  
 Upper case letters are variables with defined ranges, which correspond to the different sections of the significand described in Figure \ref{block_diagram}. The lower case letters are constants in each problem, which are replaced by the python wrapper script, where in particular $w\in \{0,1\}$, is a single bit of the significand as shown in the diagram. We note here that the splitting of the significand has forced the use of two variables, $X$ and $Z$, to model the problem. On the right hand side of the inequality in Template 1, the $2^{-33}a$ is an error term introduced to model the truncation of the squared term in the algorithm. This is a bound on how large the error may be and is moved to the right hand side because in each of these problems the coefficient $a$ is negative, making the constraint tighter. This should not be surprising since the coefficient of the square term in the Taylor expansion of $log_2(1+x)$ is negative. 
 
@@ -275,7 +287,6 @@ The second implementation in Table \ref{result} is an experimental test case gen
 
 % Table of results
 \begin{table}
-\label{result}     
 \begin{tabular}{lll}
 \hline\noalign{\smallskip}
 Design & Floating point $\log_2$ & Fixed point 8.24 $\log_2$    \\
@@ -291,7 +302,7 @@ Design & Floating point $\log_2$ & Fixed point 8.24 $\log_2$    \\
 \caption{Verification runtime results for industrial implementations of logarithm base 2. The floating point implementation is a binary 32 bit IEEE-754 implementation.\newline
 a. Run on Intel Xeon E5 2698, speed: 2.3 GHz, CPUS: 2, cores: 2, cache-size: 40MB
 \newline
-b. Run on Intel Xeon X5680 machines, speed: 3.33 GHz, CPUS: 2, cores: 12, cache-size: 12MB}
+b. Run on Intel Xeon X5680 machines, speed: 3.33 GHz, CPUS: 2, cores: 12, cache-size: 12MB}\label{result}     
 \end{table}
 
 % Speedup
@@ -327,7 +338,7 @@ In this code, the input is represented as a sum of two double precision argument
 
 The Gappa approach makes use of the IEEEdouble shortcut for the IEEE-compliant double precision \textit{round to nearest} mode, in order to encode the rounding errors in this implementation. Since the IEEE-754 standard imposes exact arithmetic in double precision \textit{round to nearest} mode, the maximum relative error incurred in each arithmetic operation is $2^{-54}$, since double precision uses a 53 bit significand. This keeps the error modelling for our MetiTarski problems far simpler than in some hardware algorithms, which can operate at the bit level. Essentially, for each of the operations in the C code, a maximum relative error of $2^{-54}$ can be incurred. This property is commonly described as the $(1+\epsilon)$ lemma. Harrison describes the bounds on $\epsilon$ in \cite{harrison2006floating}.
 
-The full Gappa script is given in \cite{5483294}, and for the purpose of comparison we use the same outline of the problem to prove, just using more explicit error modelling. In the Gappa script, 4 variables are used, since the sine is represented by a variable $S\in[0,1]$. Since MetiTarski supports axiomatic bounds on functions such as sine, this variable is dropped in order to reduce the problem to 3 variables. Since Gappa has no notion of sine, first the approximation error between the exact polynomial approximation and sine had to be calculated. This approximation error takes no account of any floating point rouding errors. For this purpose the Sollya tool \cite{ChevillardJoldesLauter2010}, was used to prove that,
+The full Gappa script is given in \cite{5483294}, and for the purpose of comparison we use the same outline of the problem to prove, just using more explicit error modelling. In the Gappa script, 4 variables are used, since the sine is represented by a variable $S\in[0,1]$. MetiTarski supports axiomatic bounds on functions such as sine, so this variable is dropped in order to reduce the problem to 3 variables. As Gappa has no notion of sine, first the approximation error between the exact polynomial approximation and sine had to be calculated. This approximation error takes no account of any floating point rouding errors. For this purpose the Sollya tool \cite{ChevillardJoldesLauter2010}, was used to prove that,
 \begin{equation}
 |\mathrm{Y}| \leq 6.3 \times 10^{-3} \Rightarrow\left|\frac{\mathrm{PolySinY}-\operatorname{SinY}}{\operatorname{SinY}}\right| \leq 3.7 \times 10^{-24}.
 \end{equation}
@@ -352,16 +363,16 @@ We consider only $H>0$, which implies that $\sin{(Y)}>0$. We combine this with t
     \\
     & \forall e_i \in [1-2^{-54},1+2^{-54}].
 \end{align}
-Using our bounding functions (eqn \ref{bound_fun}) we can reduce the problem to proving the four inequalities
+Using our bounding functions (eqn \ref{bound_fun}), we can reduce the problem to proving the four inequalities
 \begin{align}
     &H + e_7(L+g_{\textrm{max}}(H)) < (1+2^{-67}) \sin{(Y)}\label{upper_bound} \\
     &H + e_7(L+g_{\textrm{min}}(H)) > (1-2^{-67}) \sin{(Y)}\label{lower_bound} \quad \textrm{for}\,  e_7=1\pm2^{-54}.
 \end{align}
 Due to the error bounding approach and the anti-symmetry of sine and the polynomial in $H$, proving these four inequalities is sufficient to verify the original problem (eqn. \ref{orig_prob}).
 
-Like the Gappa solution, MetiTarski required further assistance with some basic rewriting for one of the inequalities. We can take these separate conjectures and AND them together, since they are all subject to the same constraints. The full proof script is given in Appendix \ref{sine_appendix}. This problem was provable using MetiTarski, with a runtime of 115 seconds on an Intel I7-3517U CPU.
+Like the Gappa solution, MetiTarski required further assistance with some basic rewriting for one of the inequalities. The full proof scripts are given in Appendix \ref{sine_appendix}. The 4 problems were provable using MetiTarski, with a combined runtime of 460 seconds on an Intel I7-3517U CPU.
 
-We will briefly digress, as these experiments also highlighted some interesting MetiTarski behaviour. MetiTarski supports 3 different RCF solvers: Z3 \cite{de2008z3}, QEPCAD B \cite{brown2003qepcad} and Mathematica \cite{Mathematica}. Only by using Mathematica as the underlying RCF solver, were we able to prove the results. In fact, neither Z3 nor QEPCAD B could prove the significantly easier problem,
+We will briefly digress, as these experiments also highlighted some interesting MetiTarski behaviour. MetiTarski invokes an RCF solver during its operation, and it can be configured to use any one of Z3 \cite{de2008z3}, QEPCAD B \cite{brown2003qepcad} or Mathematica (invoked in batch mode) \cite{Mathematica}. Only Mathematica terminates in a reasonable amount of time in this problem domain. In fact, using Z3 or QEPCAD B, MetiTarski hangs when trying to prove the significantly easier problem,
 \begin{equation}
     H + (1-2^{-54})\times(L+g(H,0,...,0)) < (1+2^{-67})\sin{(Y)}.
 \end{equation}
@@ -377,7 +388,7 @@ Given the availability of tools with inbuilt floating point rounding, such as Ga
 \section{Related work}
 \label{Related}
 % General floating point challenges
-An important problem for verification will be the interplay of floating point and bit level operations, common in real code. As observed by de Dinechin, Lauter and Melquiond expert developers will arrange code in order to take advantage of situations where floating point arithmetic is exact, such as multiplication by a power of two, to name just one \cite{de2006assisted}. Another trick, computing $2^n$ in double precision, can be done by shifting $n+1023$ left by 52 bits \cite{mine2012abstract}. Such techniques make verification more challenging, particularly in the context of high precision transcendental functions \cite{lee2016verifying}. Code obfuscation can easily occur in the optimisation stages, when the underlying mathematical approximations become obscured as expressions are manipulated and re-ordered in order to maximise floating point accuracy.
+An important problem for verification will be the interplay of floating point and bit level operations, common in real code. As observed by de Dinechin, Lauter and Melquiond, expert developers will arrange code in order to take advantage of situations where floating point arithmetic is exact, such as multiplication by a power of two, to name just one \cite{de2006assisted}. Another trick, computing $2^n$ in double precision, can be done by shifting $n+1023$ left by 52 bits \cite{mine2012abstract}. Such techniques make verification more challenging, particularly in the context of high precision transcendental functions \cite{lee2016verifying}. Code obfuscation can easily occur in the optimisation stages, when the underlying mathematical approximations become obscured as expressions are manipulated and re-ordered in order to maximise floating point accuracy.
 
 % Harrison & HOL Light
 We have already described the Gappa approach, but many other tools have been applied to floating point algorithm verification. John Harrison conducted some of the earliest and most rigorous work via interactive theorem proving, using the HOL Light proof assistant~\cite{harrison1997floating}. Above, we highlighted how Harrison had developed an entire theory of floating point arithmetic \cite{harrison1999machine}. He defined the set of representable floating point numbers as a parameterised triple $(E,p,N)$, which is the set of real numbers representable in the form $(-1)^s 2^{e-N} k$ with $e<E$, $k<2^p$ and $s<2$. Formalizations of the four standard rounding modes (nearest, down, up, zero), the widely used $(1+\epsilon)$ lemma and other lemmas about exactness are constructed in HOL Light. As a result of this underlying theory, most floating point problems are ignored and he is able to use exact real numbers and straightforward algebraic calculations \cite{harrison1999machine}. Such an approach is labour intensive and not easily adaptable to changes in the algorithm: for example an increase in the input bit width would require a large portion of the work to be done again. Note however, that Harrison's proofs are more detailed and refer to specific features of the IEEE floating point standard, such as the various available rounding modes. 
@@ -393,7 +404,7 @@ In addition to these studies several theorem provers have been applied to floati
 \section{Conclusion}
 \label{Conclusion}
 We have successfully verified a variety of fixed and floating point logarithm implementations using the MetiTarski theorem prover.
-We have also identified a bug in an algorithm that was close to production. Most interesting are the performance results, which suggest that this technique will be viable in the future, when higher precision algorithms are developed. A software implementation of the sine function was also successfully verified. This highlights the potentially broad scope of this approach, although more complex software algorithms may not be amenable. 
+We have also identified a bug in an algorithm that was close to production. Most interesting are the performance results, which suggest that this technique will be viable in the future, when higher precision algorithms are developed. In a comparison with a more thoroughly explored technique, using Gappa, our approach held its own in successfully verifying a double precision software implementation of the sine function. This highlights the potentially broad scope of this approach, although more complex software algorithms may not be amenable. 
 
 For a set of algorithms following a basic outline, it is possible to automate the whole verification procedure after the initial template and wrapper scripts are written. In this type of setting, the technique is quite powerful. However, for algorithms not following a standard format, the verification process requires significantly more manual effort by a skilled verification engineer than alternative methods. For some cases, the approach may be unsuccessful if the algorithm uses techniques we can't model using MetiTarski. 
 
@@ -415,7 +426,7 @@ We would like to thank Mathew Eaton and Ran Zmigrod for helpful contributions du
 
 \appendix
 \section{Approximation to $\ln{2}$} \label{ln2_appendix}
-For the examples given in \S \ref{Apps}, we use the constant $l$ as an approximation to $\ln{2}$. The MetiTarski problem used to prove that $\abs{l-\ln{(2)}}<2^{-37}$, is given below. It uses no variables. Text following a \% sign is a comment.
+For the examples given in \S \ref{Apps}, we use the constant, $l$, as an approximation to $\ln{2}$. The MetiTarski problem used to prove that $\abs{l-\ln{(2)}}<2^{-37}$, is given below. It uses no variables. Text following a \% sign is a comment.
 \begin{lstlisting}
 % fof = first order formula
 % Syntax: fof(<problem_name>, <type>, <formula_to_prove>).
@@ -429,7 +440,7 @@ include('Axioms/abs.ax').         % Include axioms describing abs
 \end{lstlisting}
 
 \section{Sine Approximation Problem} \label{sine_appendix}
-We show the MetiTarski problem from \S \ref{gappa}, which uses 3 variables and the sin-extended axioms. It is comprised of four conjectures under the same constraints, which we AND together. 
+We show the MetiTarski problems from \S \ref{gappa}, which uses 3 variables and the sin-extended axioms. There are 4 conjectures, which are subject to the same constraints. Variables are represented by capital letters and are declared within the square brackets. The constants are the result of compiling the C code from \S \ref{gappa}, adhering to the C99 standard. We shall present one script in full, then the other 3 just need to have the inequality to prove replaced. 
 \begin{itemize}
     \item Y - the argument of sine
     \item H - the msb of Y (approx)
@@ -453,26 +464,29 @@ H + (L + ((1-2^(-54))^4 * a * H^3)
 + ((1-2^(-54))^5 * (1+2^(-54))^2 * b * H^5) 
 + ((1-2^(-54))^7 * (1+2^(-54))^2 * c * H^7))*(1+2^(-54)) 
 < (1+2^(-67))*sin(Y)    
-&
-H + (L + ((1-2^(-54))^4 * a * H^3) 
-+ ((1-2^(-54))^5 * (1+2^(-54))^2 * b * H^5) 
-+ ((1-2^(-54))^7 * (1+2^(-54))^2 * c * H^7))*(1-2^(-54)) 
-< (1+2^(-67))*sin(Y)    
-&
-H + (L + ((1+2^(-54))^4 * a * H^3) 
-+ ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
-+ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1+2^(-54)) 
-> (1-2^(-67))*sin(Y) 
-&
-H + L + (((1+2^(-54))^4 * a * H^3) 
-+ ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
-+ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1-2^(-54)) - 2^(-107)*H 
-> (1-2^(-67))*sin(Y) 
 ))).
 
 include('Axioms/general.ax').
 include('Axioms/sin-extended.ax').
 \end{lstlisting}
 
+
+\noindent\textbf{Additional inequalities to prove:}
+\begin{lstlisting}
+H + (L + ((1-2^(-54))^4 * a * H^3) 
++ ((1-2^(-54))^5 * (1+2^(-54))^2 * b * H^5) 
++ ((1-2^(-54))^7 * (1+2^(-54))^2 * c * H^7))*(1-2^(-54)) 
+< (1+2^(-67))*sin(Y)    
+
+H + (L + ((1+2^(-54))^4 * a * H^3) 
++ ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
++ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1+2^(-54)) 
+> (1-2^(-67))*sin(Y) 
+
+H + L + (((1+2^(-54))^4 * a * H^3) 
++ ((1+2^(-54))^5 * (1-2^(-54))^2 * b * H^5) 
++ ((1+2^(-54))^7 * (1-2^(-54))^2 * c * H^7))*(1-2^(-54)) - 2^(-107)*H 
+> (1-2^(-67))*sin(Y) 
+\end{lstlisting}
 \end{document}
 
