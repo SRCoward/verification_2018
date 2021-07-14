@@ -331,7 +331,7 @@ The full Gappa script is given in \cite{5483294}, and for the purpose of compari
 \begin{equation}
 |\mathrm{Y}| \leq 6.3 \times 10^{-3} \Rightarrow\left|\frac{\mathrm{PolySinY}-\operatorname{SinY}}{\operatorname{SinY}}\right| \leq 3.7 \times 10^{-24}.
 \end{equation}
-PolySinY represents the exact polynomial specified in the C code above with no floating point rounding errors. We too make use of this same bound in the MetiTarski problems, which introduces a variable $Y$, which is what the sum of our two double precision variable $H$ (msb) and $L$ (lsb) is supposed to approximate. The Gappa script also imposes a bound on the relative error in the argument reduction stage. The MetiTarski translation of this bound is,
+PolySinY represents the exact polynomial specified in the C code above with no floating point rounding errors. We too make use of this same bound in the MetiTarski problems, which introduces a variable $Y$, which is what the sum of our two double precision variable $H$ (msb) and $L$ (lsb) is supposed to approximate. The Gappa script also imposes a bound on the relative error in the argument reduction stage. The MetiTarski translation of this bound is
 \begin{equation*}
     \left|\frac{H+L-Y}{Y}\right| < 2.53\times 10^{-23} \quad \land \quad |L|<2^{-53}|H|.
 \end{equation*}
