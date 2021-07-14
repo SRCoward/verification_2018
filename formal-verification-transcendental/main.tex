@@ -3,6 +3,7 @@
 \ifprodtf \else \usepackage{latexsym}\fi
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage{url,booktabs}
 \usepackage{caption}
 \usepackage{subcaption}
 
@@ -50,13 +51,14 @@ We present a method for formal verification of transcendental hardware and softw
 
 \section*{Declarations}
 \textbf{Funding:} The conceptualisation and much of the preliminary work for this paper was done during a summer internship at Cadence Design Systems.
+The development of MetiTarski was supported by EPSRC grants EP/C013409/1 and EP/I011005/1.
 
 \noindent\textbf{Conflicts of interest:} Theo Drane and Emiliano Morini have both now moved on to new roles and are no longer affiliated with Cadence Design Systems. 
 
 \noindent\textbf{Availability of data and material:} All problem scripts, excluding the examples verifying commercial Cadence Design Systems' implementations, can be found on GitHub \newline (https://github.com/SRCoward/verification\_2018.git).
 
 \noindent\textbf{Code availability:} MetiTarski is an open source theorem prover. It can be downloaded from
-\newline https://www.cl.cam.ac.uk/~lp15/papers/Arith/. It must be paired with an additional solver, for which there are several options documented in the MetiTarski user guide.
+\newline \url{https://www.cl.cam.ac.uk/~lp15/papers/Arith/}. It must be paired with an additional solver, for which there are several options documented in the MetiTarski user guide.
 
 \noindent\textbf{Authors' contributions:} The study conception and design was led by Theo Drane and Emiliano Morini. Material preparation and analysis were performed by Samuel Coward, Lawrence Paulson and Emiliano Morini. The first draft of the manuscript was written by Samuel Coward and edited by Lawrence Paulson.
 
@@ -374,17 +376,14 @@ The second implementation in Table \ref{result} is an experimental test case gen
 
 % Table of results
 \begin{table}
-\begin{tabular}{lll}
-\hline\noalign{\smallskip}
+\begin{tabular}{lll}\toprule
 Design & Floating point $\log_2$ & Fixed point 8.24 $\log_2$    \\
-
-\noalign{\smallskip}\hline\noalign{\smallskip}
-
+\midrule
  Input Region Verified& $[0.5,2)$ & $[1,2) $ \\ 
  MetiTarski Problems & 128 & 512 \\
  MetiTarski Time (mins.)$^a$ &  7 & 4 \\ 
  Exhaustive Test Time (mins.)$^b$ & 42 & 53 \\
-\noalign{\smallskip}\hline
+\bottomrule
 \end{tabular}
 \caption{Verification runtime results for industrial implementations of logarithm base 2. The floating point implementation is a binary 32 bit IEEE-754 implementation.\newline
 a. Run on Intel Xeon E5 2698, speed: 2.3 GHz, CPUS: 2, cores: 2, cache-size: 40MB
@@ -432,16 +431,19 @@ Internal truncation is used in this implementation because $x\in [0,1]$, implies
 
 We will verify the 23 bit and 52 bit examples given in \cite{DinJolPas2010-poly}, which use degree 2 and degree 4 polynomials respectively to approximate $\sqrt{1+x}$. Table \ref{flopo_results} shows some details of the implementations and the verification effort required. 
 
+\begin{center}
 \begin{table}
-\centering
-\begin{tabular}{|l|l|l|l|l|l|l|}
-\hline
+\begin{tabular}{lllllll}
+\toprule
 Bits & Polynomial Degree & LUT Entries & Problems & Variables & Total Time (min) & Average Time (sec)\\
+\midrule
 23 & 2 & 64 & 128 & 2 & 2.4 & 1.13 \\
 52 & 4 & 256 & 1024 & 3 & 180 & 10.8\\
-\end{tabular}
+\bottomrule
+\end{tabular}	
 \caption{Verification results for FloPoCo generated square root implementations.}\label{flopo_results}     
 \end{table}
+\end{center}
 
 To illustrate the method applied to this example, consider just the 52 bit case. The LUT contained 256 entries corresponding to 256 different polynomials. We extract the coefficients table from the VHDL and use a wrapper script to insert these values as well as the top bits of the input into the template problem, as described in the general methodology. The implementation uses 4 truncated multiply add blocks. The truncation of the remaining input bits $z$ for each of these, as shown in Figure \ref{horner_arch}, forces us to split $z$ into 4 MetiTarski variables:
 \begin{center}
@@ -507,7 +509,7 @@ In this code, the input is represented as a sum of two binary64 arguments, y = y
     \sin{(y)} = y - \frac{y^3}{6} + \frac{y^5}{120} - \frac{y^7}{5040} + ... 
 \end{equation}
 
-The Gappa approach makes use of the "IEEEdouble" shortcut for the IEEE-compliant binary64 \textit{round to nearest} mode, in order to encode the rounding errors in this implementation. Since the IEEE-754 standard imposes exact arithmetic in binary64 \textit{round to nearest} mode, the maximum relative error incurred in each arithmetic operation is $2^{-53}$, since binary64 uses a 52 bit significand. This keeps the error modelling for our MetiTarski problems far simpler than in some hardware algorithms, which can operate at the bit level. Essentially, for each of the operations in the C code, a maximum relative error of $2^{-53}$ can be incurred. This property is commonly described as the $(1+\epsilon)$ lemma. Harrison describes the bounds on $\epsilon$ in \cite{harrison2006floating}.
+The Gappa approach makes use of the ``IEEEdouble'' shortcut for the IEEE-compliant binary64 \textit{round to nearest} mode, in order to encode the rounding errors in this implementation. Since the IEEE-754 standard imposes exact arithmetic in binary64 \textit{round to nearest} mode, the maximum relative error incurred in each arithmetic operation is $2^{-53}$, since binary64 uses a 52 bit significand. This keeps the error modelling for our MetiTarski problems far simpler than in some hardware algorithms, which can operate at the bit level. Essentially, for each of the operations in the C code, a maximum relative error of $2^{-53}$ can be incurred. This property is commonly described as the $(1+\epsilon)$ lemma. Harrison describes the bounds on $\epsilon$ in \cite{harrison2006floating}.
 
 The full Gappa script is given in \cite{5483294}, and for the purpose of comparison we use the same outline of the problem to prove, just using more explicit error modelling. They also introduce the bound on the input variable $|Y|\geq 2^{-200}$, which is necessary to make sure that the relative errors due to underflow remain bounded. In the Gappa script, 4 variables are used, since the sine is represented by a variable $S\in[0,1]$. MetiTarski supports axiomatic bounds on functions such as sine, so this variable is dropped in order to reduce the problem to 3 variables. As Gappa has no notion of sine, first the approximation error between the exact polynomial approximation and sine had to be calculated. This approximation error takes no account of any floating point rouding errors. For this purpose the Sollya tool \cite{ChevillardJoldesLauter2010}, was used to prove that,
 \begin{equation}
@@ -562,7 +564,7 @@ Given the availability of tools with inbuilt floating point rounding, such as Ga
 An important problem for verification will be the interplay of floating point and bit level operations, common in real code. As observed by de Dinechin, Lauter and Melquiond, expert developers will arrange code in order to take advantage of situations where floating point arithmetic is exact, such as multiplication by a power of two, to name just one \cite{de2006assisted}. Another trick, computing $2^n$ in double precision, can be done by shifting $n+1023$ left by 52 bits \cite{mine2012abstract}. Such techniques make verification more challenging, particularly in the context of high precision transcendental functions \cite{lee2016verifying}. Code obfuscation can easily occur in the optimisation stages, when the underlying mathematical approximations become obscured as expressions are manipulated and re-ordered in order to maximise floating point accuracy.
 
 % Harrison & HOL Light
-We have already described the Gappa approach, but many other tools have been applied to floating point algorithm verification. John Harrison conducted some of the earliest and most rigorous work via interactive theorem proving, using the HOL Light proof assistant~\cite{harrison1997floating}. Above, we highlighted how Harrison had developed an entire theory of floating point arithmetic \cite{harrison1999machine}. He defined the set of representable floating point numbers as a parameterised triple $(E,p,N)$, which is the set of real numbers representable in the form $(-1)^s 2^{e-N} k$ with $e<E$, $k<2^p$ and $s<2$. Formalizations of the four standard rounding modes (nearest, down, up, zero), the widely used $(1+\epsilon)$ lemma and other lemmas about exactness are constructed in HOL Light. As a result of this underlying theory, most floating point problems are ignored and he is able to use exact real numbers and straightforward algebraic calculations \cite{harrison1999machine}. Such an approach is labour intensive and not easily adaptable to changes in the algorithm: for example an increase in the input bit width would require a large portion of the work to be done again. Note however, that Harrison's proofs are more detailed and refer to specific features of the IEEE floating point standard, such as the various available rounding modes. 
+We have already described the Gappa approach, but many other tools have been applied to floating point algorithm verification. John Harrison conducted some of the earliest and most rigorous work via interactive theorem proving, using the HOL Light proof assistant~\cite{harrison1997floating}. Above, we highlighted how Harrison had developed an entire theory of floating point arithmetic \cite{harrison1999machine}. He defined the set of representable floating point numbers as a parameterised triple $(E,p,N)$, which is the set of real numbers representable in the form $(-1)^s 2^{e-N} k$ with $e<E$, $k<2^p$ and $s<2$. Formalizations of the four standard rounding modes (nearest, down, up, zero), the widely used $(1+\epsilon)$ lemma and other lemmas about exactness are constructed in HOL Light. As a result of this underlying theory, most floating point problems are ignored and he is able to reason about real numbers and straightforward algebraic calculations \cite{harrison1999machine}. Such an approach is labour intensive and not easily adaptable to changes in the algorithm: for example an increase in the input bit width would require a large portion of the work to be done again. Note however, that Harrison's proofs are more detailed and refer to specific features of the IEEE floating point standard, such as the various available rounding modes. 
 %Additional comments about Z thm prover.
 % Later Harrison developed libraries for the reasoning of floating point numbers in HOL Light \cite{harrison1999machine,harrison2000formal}. Before any of this Barrett applied formal methods to describe the IEEE-754 and -854 standards for Z \cite{barrett1989formal}.
 
