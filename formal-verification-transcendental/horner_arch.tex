@@ -1,0 +1,63 @@
+\begin{tikzpicture}
+%draw input nodes
+\node [shape=rectangle,draw = black, minimum width = 2cm,minimum height=0.5cm] at (1,10) (y) {$y$};
+
+\node [shape=rectangle,draw = black, minimum width = 8cm,minimum height=0.5cm] at (6,10) (z) { $z$};
+
+
+%draw lookup table with nodes output from LUT
+\node [shape=rectangle,draw = black, minimum width = 1cm,minimum height=3cm] at (1,7.5) (lut) {LUT};
+\node [shape=rectangle,draw=black, minimum height=0.5cm, minimum width = 0.5cm] at (3,8.75) (an)  {$a_n$};
+\node [shape=rectangle,draw=black, minimum height=0.5cm, minimum width = 0.5cm] at (3,7.75) (an-1)  {$a_{n-1}$};
+\node [] at (3,7.375) (dot0)  {.};
+\node [] at (3,7)     (dot1)  {.};
+\node [] at (3,6.625) (dot2)  {.};
+\node [shape=rectangle,draw=black, minimum height=0.5cm, minimum width = 1.5cm] at (3,6.25) (a0)  {$a_0$};
+
+%fmas
+\node [] at (5.5,8.75) (fma0)  {};
+
+\node [shape=rectangle,draw=black, minimum height=0.5cm, minimum width = 2.5cm] at (5.5,7.75) (fma1)  {T-FMA};
+\node [] at (5.5,7.375) (dot0)  {.};
+\node [] at (5.5,7)     (dot1)  {.};
+\node [] at (5.5,6.625) (dot2)  {.};
+\node [shape=rectangle,draw=black, minimum height=0.5cm, minimum width = 2.5cm] at (5.5,6.25) (fma2)  {T-FMA};
+
+\draw[->, thick] (fma1) edge (5.5,7.25);
+
+
+%Lines between input and LUT or final output box
+\draw [->, thick] (y) edge (lut);
+
+\node[] at (10.125,7.75) (second_trunc) {};
+\node[] at (10.125,6.25) (third_trunc) {};
+
+\node[shape=ellipse, draw=black] at (8.375, 7.75) (trunc1) {Trunc};
+\node[shape=ellipse, draw=black] at (8.375, 6.25) (trunc2) {Trunc};
+\draw [-,thick] (z.south east) edge (10,6.25);
+
+
+\draw[->, thick] (second_trunc) edge (trunc1);
+\draw[->, thick] (trunc1) edge (fma1);
+\draw[->, thick] (third_trunc) edge (trunc2);
+\draw[->, thick] (trunc2) edge (fma2) ;
+
+\node [] at (8.375,7.25) (dota)  {.};
+\node [] at (8.375,7)     (dotb)  {.};
+\node [] at (8.375,6.75) (dotc)  {.};
+
+%Edges between LUT and outcomes
+\draw [->, thick] (lut) edge (an.west);
+\draw [->, thick] (lut) edge (an-1.west);
+\draw [->, thick] (lut) edge (a0.west);
+
+\draw [-, thick] (an)   edge (fma0.center);
+\node[] at (5.5,8.875) (fma0_top) {};
+\draw [->, thick] (fma0_top) edge (fma1);
+\draw [->, thick] (an-1) edge (fma1.west);
+\draw [->, thick] (a0)   edge (fma2.west);
+
+\draw[->, thick] (fma0) edge (fma1);
+
+
+\end{tikzpicture}

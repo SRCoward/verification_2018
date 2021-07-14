@@ -1,0 +1,22 @@
+%
+% Template problem for a flopoco generated 64 bit exponential function
+% - 256 table entries = 256 polynomials
+% - degree 5 polynomial
+% 
+
+fof(sam_log_general,conjecture, ! [X,Z] : (
+    (
+        X : (=-2^(-7), 2^(-7)-2^(-16)) &
+        Z : (=0, 2^(-16)-2^(-23))
+    )
+=> 
+(abs(sqrt(1 + __Y + X + Z + 2^(-7)) - 
+(((__A2*X + __A1)*(X+Z) + __A0) - (2^(-24) -2^(-36))) ) 
+<= 2^(-23)))).
+
+  
+include('Axioms/general.ax').
+include('Axioms/abs.ax').
+include('Axioms/sqrt-general.ax').
+include('Axioms/sqrt-upper.ax').
+include('Axioms/sqrt-lower.ax').

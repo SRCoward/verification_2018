@@ -1,0 +1,35 @@
+%
+% Template problem for a flopoco generated 64 bit exponential function
+% - 256 table entries = 256 polynomials
+% - degree 5 polynomial
+% 
+
+fof(sam_log_general,conjecture, ! [U,V,X,Z] : (
+    (
+        U : (=-2^(-9), 2^(-9)  - 2^(-27)) &
+        V : (=0      , 2^(-27) - 2^(-36)) &
+        X : (=0      , 2^(-36) - 2^(-46)) &
+        Z : (=0      , 2^(-46) - 2^(-53))
+    )
+=> 
+    (
+        abs(
+            sqrt(1 + __Y + U + V + X + Z + 2^(-9)) 
+            - 
+            ((((__A4*U 
+                + __A3)*(U+V) 
+                + __A2)*(U+V+X) 
+                + __A1)*(U+V+X+Z) 
+                + __A0) 
+        )  
+        <= 2
+    )
+)).
+
+  
+include('Axioms/general.ax').
+include('Axioms/abs.ax').
+include('Axioms/sqrt-general.ax').
+include('Axioms/sqrt-upper.ax').
+include('Axioms/sqrt-lower.ax').
+include('Axioms/sqrt-extended.ax').
