@@ -1,0 +1,4 @@
+upper_sin_a.tptp - runtime 135 sec - args= -m 
+upper_sin_b.tptp - runtime 146 sec - args= -m --nsatz_eadm
+lower_sin_a.tptp - runtime  96 sec - args= -m 
+lower_sin_b.tptp - runtime  85 sec - args= -m 
