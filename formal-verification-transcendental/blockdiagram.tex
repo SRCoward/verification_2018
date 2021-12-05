@@ -37,7 +37,7 @@
 \node [shape=rectangle,draw=black] at (3.5,3.5) (c) {\huge $c$};
 
 %draw output box
-\node [shape=rectangle,draw = black,minimum height=2cm] at (8,1.5) (poly) {\large $a\left \lfloor2^9(\overline{w}-2^{-9}X)^2\right \rfloor 2^{-33}+b(2^{-22}Z+2^{-16}X-2^{-7}\overline{w})2^{-16}+c$};
+\node [shape=rectangle,draw = black,minimum height=2cm] at (8,1.5) (poly) {\large $a\left \lfloor2^9((\neg{w})-2^{-9}X)^2\right \rfloor 2^{-33}+b(2^{-22}Z+2^{-16}X-2^{-7}(\neg{w}))2^{-16}+2^{-23}c$};
 
 \node [shape=rectangle,draw = black,minimum height=1cm] at (5,-0.5) (round) {\large Round and Truncate};
 
@@ -61,7 +61,8 @@
 \draw [->,very thick] (lut) edge (c);
 %Draw right angle edges
 \draw [-,very thick] (a) edge (0.5,1.5);
-\draw [-,very thick] (b) edge (2,1.5);
+\node at (2,2.4) (emptyb) {};
+\draw [->,very thick] (b) edge (emptyb);
 %\draw [-,very thick] (c) edge (3.5,1.5);
 \node at (3.5,2.4) (emptyc) {};
 \draw [->,very thick] (c) edge (emptyc);
